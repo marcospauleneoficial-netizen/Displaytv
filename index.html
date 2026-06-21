@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — Sala dos Professores</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital@1&display=swap');
+
+  :root{
+    --bg-0:#0b0e10; --bg-1:#11161a; --panel:#161c20;
+    --amber:#ffb347; --amber-dim:#7a5a26;
+    --green:#7ddc8c; --green-dim:#3a5a3f;
+    --grey-line:#2a3338; --text-soft:#aab4ba; --text-bright:#f2efe6; --red:#e2614f;
+    --gold:#e8c468;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;width:100%;}
+  body{
+    background: var(--bg-0);
+    background-image:
+      radial-gradient(circle at 50% -10%, rgba(255,179,71,.05), transparent 55%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0 2px, transparent 2px 4px);
+    color: var(--text-bright);
+    font-family:'Inter',sans-serif;
+    height:100vh; width:100vw; overflow:hidden;
+  }
+  .stage{
+    display:grid;
+    grid-template-columns: 28vw 1fr;
+    grid-template-rows: 11vh 1fr;
+    gap: 1.6vh 1.6vw;
+    height:100vh; width:100vw;
+    padding: 1.8vh 2vw;
+  }
+
+  .topbar{
+    grid-column: 1 / 3; display:flex; align-items:center; justify-content:space-between;
+    border-bottom: 1px solid var(--grey-line); padding-bottom: 1.2vh; min-height:0;
+  }
+  .brand{ display:flex; align-items:center; gap:1vw; }
+  .brand .dot{
+    width:.9vw; height:.9vw; max-width:14px; max-height:14px; border-radius:50%; background: var(--green);
+    box-shadow: 0 0 10px var(--green); animation: pulse 2.4s infinite ease-in-out; flex-shrink:0;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .brand h1{ font-family:'Archivo Black',sans-serif; font-size: 2.1vh; margin:0; color: var(--text-bright); white-space:nowrap;}
+  .brand .sub{ font-size:1.3vh; color: var(--text-soft); letter-spacing:2px; text-transform:uppercase; margin-top:2px; white-space:nowrap;}
+  .clock-date{ text-align:right; }
+  .clock{
+    font-family:'Space Mono',monospace; font-weight:700; font-size: 4.4vh; color: var(--amber);
+    letter-spacing:1px; line-height:1; text-shadow: 0 0 18px rgba(255,179,71,.35);
+  }
+  .clock .secs{ color: var(--amber-dim); font-size:2.4vh; }
+  .date-line{ font-size:1.5vh; color: var(--text-soft); margin-top:.4vh; text-transform:capitalize; }
+
+  .col-left{ display:flex; flex-direction:column; gap:1.6vh; min-height:0; height:100%; }
+  .panel{ background: var(--panel); border:1px solid var(--grey-line); border-radius: 14px; padding: 1.8vh 1.6vw; min-height:0; }
+  .panel-label{
+    font-size:1.15vh; letter-spacing:2.5px; text-transform:uppercase; color: var(--text-soft);
+    display:flex; align-items:center; gap:8px; margin-bottom:1.4vh;
+  }
+  .panel-label::after{ content:""; flex:1; height:1px; background: var(--grey-line); }
+
+  .weather-panel{ flex:0 0 auto; }
+  .weather-main{ display:flex; align-items:center; gap:1.2vw; }
+  .weather-icon{ font-size:6.5vh; line-height:1; filter: drop-shadow(0 0 10px rgba(255,179,71,.25)); animation: float 4s ease-in-out infinite; }
+  @keyframes float{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+  .weather-temp{ font-family:'Space Mono',monospace; font-size:4.6vh; font-weight:700; color: var(--text-bright); }
+  .weather-temp sup{ font-size:2.2vh; color: var(--text-soft); }
+  .weather-desc{ font-size:1.6vh; color: var(--text-soft); margin-top:2px; text-transform:capitalize; }
+  .weather-meta{ display:flex; gap:1.2vw; margin-top:1.5vh; padding-top:1.3vh; border-top:1px dashed var(--grey-line); }
+  .weather-meta div{ flex:1; text-align:center; }
+  .weather-meta .num{ font-family:'Space Mono',monospace; font-size:1.8vh; color: var(--amber); }
+  .weather-meta .lbl{ font-size:.95vh; color: var(--text-soft); text-transform:uppercase; letter-spacing:1px; margin-top:2px;}
+  .weather-loc{ font-size:1.15vh; color: var(--text-soft); margin-top:1.3vh; }
+
+  .verse-panel{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  .verse-body{ flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0; }
+  .verse-text{
+    font-family:'Crimson Pro', serif; font-style:italic; font-size:2vh; line-height:1.5;
+    color: var(--text-bright); position:relative; padding-left:1.4vw;
+    border-left: 3px solid var(--gold);
+  }
+  .verse-ref{
+    margin-top:1.4vh; font-family:'Space Mono',monospace; font-size:1.3vh; color: var(--gold);
+    letter-spacing:1px; text-align:right;
+  }
+  .verse-tag{ font-size:1vh; color: var(--text-soft); text-transform:uppercase; letter-spacing:1.5px; margin-top:.6vh; text-align:right;}
+
+  .status-panel{ flex:0 0 auto; }
+  .status-list{ display:flex; flex-direction:column; gap:.5vh; }
+  .status-row{ display:flex; align-items:center; gap:.7vw; }
+  .status-row .ico{ font-size:1.7vh; }
+  .status-row .name{ flex:1; font-size:1.25vh; color: var(--text-bright); font-weight:600;}
+  .status-pill{
+    font-size:.95vh; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+    padding:.35vh .8vh; border-radius:999px; white-space:nowrap;
+  }
+  .status-pill.ok{ background: rgba(125,220,140,.12); color: var(--green); border:1px solid var(--green-dim); }
+  .status-pill.bad{ background: rgba(226,97,79,.12); color: var(--red); border:1px solid #5a3530; animation: blink 1.6s infinite; }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+  /* ===== RIGHT COLUMN : FEED CONTÍNUO ===== */
+  .col-right{ display:flex; flex-direction:column; min-height:0; height:100%; }
+  .feed-panel{ flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  .feed-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom: .8vh; flex-shrink:0;}
+  .feed-title{ font-family:'Archivo Black',sans-serif; font-size:2.2vh; color: var(--text-bright); }
+  .feed-title .hl{ color: var(--amber); }
+  .feed-day{ font-size:1.4vh; color: var(--text-soft); text-transform:capitalize; }
+
+  .feed-viewport{ flex:1; min-height:0; overflow:hidden; position:relative; mask-image: linear-gradient(to bottom, transparent 0, black 4%, black 96%, transparent 100%); }
+  .feed-track{ display:flex; flex-direction:column; gap:1vh; position:relative; }
+
+  .feed-row{
+    display:grid;
+    grid-template-columns: 2.4vw 6.5vw 11vw 1fr 8vw;
+    align-items:center;
+    gap: 1vw;
+    background: var(--bg-1);
+    border:1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 1.1vh 1.2vw;
+    flex-shrink:0;
+  }
+  .feed-row.live{
+    border-color: var(--amber-dim);
+    background: linear-gradient(90deg, rgba(255,179,71,.13), var(--bg-1) 45%);
+    box-shadow: 0 0 0 1px rgba(255,179,71,.3) inset;
+  }
+  .feed-row.vazio{ opacity:.45; }
+  .feed-ico{ font-size:2vh; text-align:center; }
+  .feed-res{ font-size:1.25vh; color: var(--text-soft); text-transform:uppercase; letter-spacing:.5px; }
+  .feed-time{ font-family:'Space Mono',monospace; color: var(--amber); font-size:1.5vh; font-weight:700; }
+  .feed-time .day-mini{ display:block; font-size:1vh; color: var(--text-soft); font-weight:400; text-transform:uppercase; letter-spacing:1px; }
+  .feed-prof{ font-size: 1.75vh; font-weight:700; color: var(--text-bright); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .feed-prof.vazio-txt{ color: var(--text-soft); font-weight:400; font-style:italic; }
+  .feed-tag{ text-align:right; font-size:1.1vh; letter-spacing:1px; text-transform:uppercase; }
+  .feed-tag.now{ color: var(--green); font-weight:700; }
+  .feed-tag.now::before{ content:"● "; animation: blink 1.2s infinite; }
+  .feed-tag.next{ color: var(--text-soft); }
+  .feed-tag.done{ color: #5a6268; }
+
+  .empty-day{
+    flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1.4vh;
+    color: var(--text-soft); font-size:2.2vh; text-align:center;
+  }
+  .empty-day .big{ font-size:5vh; }
+
+  .footer-note{ margin-top:.8vh; font-size:1.05vh; color: var(--text-soft); text-align:right; letter-spacing:.5px; flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <h1>Mural de Horários</h1>
+        <div class="sub">Painel ao vivo · Todos os recursos</div>
+      </div>
+    </div>
+    <div class="clock-date">
+      <div class="clock" id="clock">--:--<span class="secs">:--</span></div>
+      <div class="date-line" id="date-line">carregando data...</div>
+    </div>
+  </div>
+
+  <div class="col-left">
+    <div class="panel weather-panel">
+      <div class="panel-label">Clima agora · Belo Horizonte</div>
+      <div class="weather-main">
+        <div class="weather-icon" id="weather-icon">⛅</div>
+        <div>
+          <div class="weather-temp" id="weather-temp">--<sup>°C</sup></div>
+          <div class="weather-desc" id="weather-desc">carregando...</div>
+        </div>
+      </div>
+      <div class="weather-meta">
+        <div><div class="num" id="weather-feels">--°</div><div class="lbl">Sensação</div></div>
+        <div><div class="num" id="weather-wind">-- km/h</div><div class="lbl">Vento</div></div>
+        <div><div class="num" id="weather-min-max">--/--°</div><div class="lbl">Mín / Máx</div></div>
+      </div>
+      <div class="weather-loc">📍 Belo Horizonte, MG</div>
+    </div>
+
+    <div class="panel verse-panel">
+      <div class="panel-label">Versículo do dia</div>
+      <div class="verse-body">
+        <div class="verse-text" id="verse-text">Carregando...</div>
+        <div class="verse-ref" id="verse-ref"></div>
+        <div class="verse-tag">para encorajar o seu dia</div>
+      </div>
+    </div>
+
+    <div class="panel status-panel">
+      <div class="panel-label">Status dos recursos</div>
+      <div class="status-list" id="status-list"></div>
+    </div>
+  </div>
+
+  <div class="col-right">
+    <div class="panel feed-panel">
+      <div class="feed-head">
+        <div class="feed-title">Reservas de <span class="hl">hoje</span> — todos os recursos</div>
+        <div class="feed-day" id="feed-day">--</div>
+      </div>
+      <div class="feed-viewport" id="feed-viewport">
+        <div class="feed-track" id="feed-track"></div>
+      </div>
+      <div class="footer-note">atualização automática em tempo real, conforme as reservas são feitas</div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCi62yDjL4ayE3JoCP-m8dDpyEb1jIiZis",
+  authDomain: "agendamento-escolar-86843.firebaseapp.com",
+  projectId: "agendamento-escolar-86843",
+  storageBucket: "agendamento-escolar-86843.firebasestorage.app",
+  messagingSenderId: "339474137748",
+  appId: "1:339474137748:web:94412cb05e597f7e9cea81"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const reservasCol = collection(db, "reservas");
+const statusCol = collection(db, "status");
+
+const RESOURCES = [
+  {id:'informatica', label:'Informática', icon:'💻'},
+  {id:'tablets', label:'Tablets', icon:'📱'},
+  {id:'tela', label:'Tela Interativa', icon:'🖥️'},
+  {id:'biblioteca', label:'Biblioteca', icon:'📚'},
+  {id:'video', label:'Sala de Vídeo', icon:'🎬'},
+];
+const RES_BY_ID = Object.fromEntries(RESOURCES.map(r=>[r.id,r]));
+
+const DAY_NAMES = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const TIME_TABLE = {
+  'Manhã': [
+    {periodo:1, start:'07:00', end:'07:50'},
+    {periodo:2, start:'07:50', end:'08:40'},
+    {periodo:3, start:'08:40', end:'09:30'},
+    {periodo:4, start:'09:50', end:'10:40'},
+    {periodo:5, start:'10:40', end:'11:30'},
+  ],
+  'Tarde': [
+    {periodo:1, start:'13:00', end:'13:50'},
+    {periodo:2, start:'13:50', end:'14:40'},
+    {periodo:3, start:'14:40', end:'15:30'},
+    {periodo:4, start:'15:50', end:'16:40'},
+    {periodo:5, start:'16:40', end:'17:30'},
+  ]
+};
+
+let reservations = {};
+let statuses = {};
+let scrollOffset = 0;
+let trackHeight = 0;
+let viewportHeight = 0;
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+function timeToMinutes(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').innerHTML =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}<span class="secs">:${pad(now.getSeconds())}</span>`;
+  document.getElementById('date-line').textContent =
+    now.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  return now;
+}
+
+function currentWeekdayName(now){ return DAY_NAMES[now.getDay()]; }
+
+function classifySlot(turno, periodo, now){
+  const slot = TIME_TABLE[turno]?.find(s=>s.periodo===periodo);
+  if(!slot) return 'done';
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  const start = timeToMinutes(slot.start);
+  const end = timeToMinutes(slot.end);
+  if(nowMin >= start && nowMin < end) return 'now';
+  if(nowMin < start) return 'next';
+  return 'done';
+}
+
+// Monta a lista única, em ordem cronológica, juntando TODOS os recursos no mesmo horário/período
+function buildFeedItems(todayName, now){
+  const items = [];
+  ['Manhã','Tarde'].forEach(turno=>{
+    TIME_TABLE[turno].forEach(slot=>{
+      RESOURCES.forEach(resource=>{
+        const st = statuses[resource.id];
+        const key = `${resource.id}__${todayName}__${turno}__${slot.periodo}`;
+        const res = reservations[key];
+        const state = classifySlot(turno, slot.periodo, now);
+        items.push({
+          resource, turno, periodo: slot.periodo, start: slot.start, end: slot.end,
+          professor: res ? res.professor : null,
+          blocked: !!(st && st.blocked),
+          blockedReason: st ? st.reason : null,
+          state
+        });
+      });
+    });
+  });
+  return items;
+}
+
+function renderFeedRow(item){
+  const occupied = !!item.professor;
+  const rowClass = ['feed-row'];
+  if(item.state==='now') rowClass.push('live');
+  if(!occupied) rowClass.push('vazio');
+
+  let tagHtml = item.state==='now' ? '<span class="feed-tag now">agora</span>'
+    : item.state==='next' ? '<span class="feed-tag next">a seguir</span>'
+    : '<span class="feed-tag done">encerrado</span>';
+
+  let profHtml;
+  if(item.blocked){
+    profHtml = `<span class="feed-prof vazio-txt">🚫 indisponível — ${escapeHtml(item.blockedReason || 'problema técnico')}</span>`;
+  } else if(occupied){
+    profHtml = `<span class="feed-prof">${escapeHtml(item.professor)}</span>`;
+  } else {
+    profHtml = `<span class="feed-prof vazio-txt">Livre</span>`;
+  }
+
+  return `<div class="${rowClass.join(' ')}">
+    <div class="feed-ico">${item.resource.icon}</div>
+    <div class="feed-res">${item.resource.label}</div>
+    <div class="feed-time">${item.start}–${item.end}<span class="day-mini">${item.turno} · ${item.periodo}º</span></div>
+    ${profHtml}
+    ${tagHtml}
+  </div>`;
+}
+
+function renderFeed(){
+  const now = new Date();
+  const todayName = currentWeekdayName(now);
+  document.getElementById('feed-day').textContent =
+    (todayName === 'Domingo' || todayName === 'Sábado') ? `Hoje é ${todayName} — sem aulas` : `Hoje é ${todayName}-feira`;
+
+  const track = document.getElementById('feed-track');
+  const viewport = document.getElementById('feed-viewport');
+
+  if(todayName === 'Domingo' || todayName === 'Sábado'){
+    viewport.innerHTML = `<div class="empty-day"><span class="big">🌤️</span>Não há aulas hoje. Bom descanso!</div>`;
+    return;
+  }
+  if(!viewport.querySelector('#feed-track')) viewport.innerHTML = `<div class="feed-track" id="feed-track"></div>`;
+
+  const items = buildFeedItems(todayName, now);
+  const rowsHtml = items.map(renderFeedRow).join('');
+  // Duplicamos a lista para criar um loop contínuo e suave
+  document.getElementById('feed-track').innerHTML = rowsHtml + rowsHtml;
+}
+
+function renderStatusList(){
+  const list = document.getElementById('status-list');
+  list.innerHTML = RESOURCES.map(r=>{
+    const st = statuses[r.id];
+    const blocked = st && st.blocked;
+    return `<div class="status-row">
+      <span class="ico">${r.icon}</span>
+      <span class="name">${r.label}</span>
+      <span class="status-pill ${blocked ? 'bad' : 'ok'}">${blocked ? 'com problema' : 'ok'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ===== Auto-scroll contínuo e suave da lista (passa uma reserva atrás da outra) =====
+function autoScroll(){
+  const viewport = document.getElementById('feed-viewport');
+  const track = document.getElementById('feed-track');
+  if(!track || !track.firstElementChild) return;
+
+  scrollOffset += 0.55; // velocidade do scroll (px por frame)
+  const halfHeight = track.scrollHeight / 2;
+  if(halfHeight > 0 && scrollOffset >= halfHeight){
+    scrollOffset = 0;
+  }
+  track.style.transform = `translateY(-${scrollOffset}px)`;
+  requestAnimationFrame(autoScroll);
+}
+
+onSnapshot(reservasCol, (snap)=>{
+  reservations = {};
+  snap.forEach(d=>{ reservations[d.id] = d.data(); });
+  renderFeed();
+});
+onSnapshot(statusCol, (snap)=>{
+  statuses = {};
+  snap.forEach(d=>{ statuses[d.id] = d.data(); });
+  renderStatusList();
+  renderFeed();
+});
+
+setInterval(updateClock, 1000);
+setInterval(renderFeed, 60000); // recalcula "agora/a seguir/encerrado" a cada minuto
+updateClock();
+renderFeed();
+renderStatusList();
+requestAnimationFrame(autoScroll);
+
+// ===== VERSÍCULO DO DIA (rotaciona automaticamente, um por dia) =====
+const VERSES = [
+  {text:"Tudo posso naquele que me fortalece.", ref:"Filipenses 4:13"},
+  {text:"O Senhor é a minha força e o meu escudo; nele o meu coração confia.", ref:"Salmos 28:7"},
+  {text:"Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus.", ref:"Isaías 41:10"},
+  {text:"Tudo posso naquele que me fortalece; e o que começa hoje, ele completa.", ref:"Filipenses 4:13"},
+  {text:"Lancem sobre ele toda a sua ansiedade, porque ele tem cuidado de vocês.", ref:"1 Pedro 5:7"},
+  {text:"Os que esperam no Senhor renovam as suas forças, sobem com asas como águias.", ref:"Isaías 40:31"},
+  {text:"Tudo o que fizerem, façam de todo o coração, como para o Senhor.", ref:"Colossenses 3:23"},
+  {text:"Confia ao Senhor todas as suas obras, e os teus pensamentos serão bem-sucedidos.", ref:"Provérbios 16:3"},
+  {text:"O Senhor te guardará de todo o mal; ele guardará a tua alma.", ref:"Salmos 121:7"},
+  {text:"Posso eu todas as coisas em Cristo que me fortalece.", ref:"Filipenses 4:13"},
+  {text:"Sejam fortes e corajosos; o Senhor, vosso Deus, será convosco.", ref:"Josué 1:9"},
+  {text:"Entrega o teu caminho ao Senhor, confia nele, e ele tudo fará.", ref:"Salmos 37:5"},
+  {text:"Tudo tem o seu tempo determinado, e há tempo para todo propósito.", ref:"Eclesiastes 3:1"},
+  {text:"A alegria do Senhor é a nossa força.", ref:"Neemias 8:10"},
+  {text:"Bem-aventurados os que ensinam, porque colhem o que semeiam com amor.", ref:"Gálatas 6:9 (adaptado)"},
+  {text:"Não se turbe o vosso coração; credes em Deus, credes também em mim.", ref:"João 14:1"},
+  {text:"Tudo que fizeres, faze-o bem, pois o trabalho das mãos é digno de bênção.", ref:"Eclesiastes 9:10"},
+  {text:"Os planos do Senhor para vocês são de paz e não de mal.", ref:"Jeremias 29:11"},
+  {text:"Deus é fiel, e não permitirá que sejais tentados além do que podeis suportar.", ref:"1 Coríntios 10:13"},
+  {text:"Em tudo dai graças, porque esta é a vontade de Deus para vocês.", ref:"1 Tessalonicenses 5:18"},
+  {text:"A sabedoria começa com o temor do Senhor.", ref:"Provérbios 9:10"},
+  {text:"Ensina a criança no caminho em que deve andar.", ref:"Provérbios 22:6"},
+  {text:"O Senhor te abençoe e te guarde.", ref:"Números 6:24"},
+  {text:"Tudo o que fazes, prospera, porque o Senhor está contigo.", ref:"Gênesis 39:3 (adaptado)"},
+  {text:"Vinde a mim, todos os que estais cansados, e eu vos aliviarei.", ref:"Mateus 11:28"},
+  {text:"Como o ferro afia o ferro, assim o homem afia o seu próximo.", ref:"Provérbios 27:17"},
+  {text:"Que a paz de Deus, que excede todo entendimento, guarde seu coração.", ref:"Filipenses 4:7"},
+  {text:"Quem semeia com lágrimas, com alegria há de colher.", ref:"Salmos 126:5"},
+  {text:"Tudo coopera para o bem daqueles que amam a Deus.", ref:"Romanos 8:28"},
+  {text:"Sede fortes e tenha coragem; não temais nem vos atemorizeis.", ref:"Deuteronômio 31:6"},
+  {text:"O Senhor é bom para com os que esperam por ele, para a alma que o busca.", ref:"Lamentações 3:25"},
+];
+
+function renderVerseOfDay(){
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+  const verse = VERSES[dayOfYear % VERSES.length];
+  document.getElementById('verse-text').textContent = `"${verse.text}"`;
+  document.getElementById('verse-ref').textContent = verse.ref;
+}
+renderVerseOfDay();
+
+// ===== CLIMA (Open-Meteo, Belo Horizonte) =====
+const LAT = -19.9167, LON = -43.9345;
+const WEATHER_MAP = {
+  0:['Céu limpo','☀️'], 1:['Predomínio de sol','🌤️'], 2:['Parcialmente nublado','⛅'], 3:['Nublado','☁️'],
+  45:['Neblina','🌫️'], 48:['Neblina','🌫️'],
+  51:['Garoa leve','🌦️'], 53:['Garoa','🌦️'], 55:['Garoa forte','🌧️'],
+  61:['Chuva leve','🌧️'], 63:['Chuva','🌧️'], 65:['Chuva forte','⛈️'],
+  71:['Neve leve','🌨️'], 73:['Neve','🌨️'], 75:['Neve forte','❄️'],
+  80:['Pancadas de chuva','🌦️'], 81:['Pancadas de chuva','🌧️'], 82:['Pancadas fortes','⛈️'],
+  95:['Trovoadas','⛈️'], 96:['Trovoadas c/ granizo','⛈️'], 99:['Trovoadas fortes','⛈️'],
+};
+
+async function loadWeather(){
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const cur = data.current;
+    const [desc, icon] = WEATHER_MAP[cur.weather_code] || ['Tempo variável','⛅'];
+
+    document.getElementById('weather-icon').textContent = icon;
+    document.getElementById('weather-temp').innerHTML = `${Math.round(cur.temperature_2m)}<sup>°C</sup>`;
+    document.getElementById('weather-desc').textContent = desc;
+    document.getElementById('weather-feels').textContent = `${Math.round(cur.apparent_temperature)}°`;
+    document.getElementById('weather-wind').textContent = `${Math.round(cur.wind_speed_10m)} km/h`;
+    if(data.daily){
+      const max = Math.round(data.daily.temperature_2m_max[0]);
+      const min = Math.round(data.daily.temperature_2m_min[0]);
+      document.getElementById('weather-min-max').textContent = `${min}/${max}°`;
+    }
+  }catch(e){
+    console.error('Erro ao buscar clima', e);
+    document.getElementById('weather-desc').textContent = 'Não foi possível obter o clima';
+  }
+}
+loadWeather();
+setInterval(loadWeather, 15 * 60 * 1000);
+</script>
+</body>
+</html>
